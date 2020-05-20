@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import {
-    TableRow,
-    TableCell,
     Container,
     LinearProgress,
-    Table,
-    TableHead,
-    TableBody,
     Typography,
     Button,
-    Grid
+    Grid,
+    Breadcrumbs,
+    Link
 } from '@material-ui/core';
 
 import SingleSectionForm from './SingleSectionForm'
+import SingleItemForm from '../item/SingleItemForm'
+
+import {
+    sortableContainer,
+    sortableElement
+} from 'react-sortable-hoc';
+
+import arrayMove from 'array-move';
 
 function ModifySection(props) {
     const [isSectionLoaded, setIsSectionLoaded] = useState(false);
@@ -56,10 +61,60 @@ function ModifySection(props) {
             })
     }
 
+    function removeItemFromList(id) {
+        console.log(id)
+        let newSection = { ...section }
+        newSection.items = newSection.items.filter(e => e.id !== id)
+        setSection(newSection)
+    }
+
     useEffect(() => {
         getSection(props.match.params.id)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    function onSortEnd({ oldIndex, newIndex }) {
+        let newSection = { ...section }
+        newSection.items = arrayMove(newSection.items, oldIndex, newIndex)
+        setSection(newSection)
+
+        let itemsPosition = newSection.items.map((e, i) => ({ id: e.id, position: i }))
+
+        fetch(`https://api-links.montanari.live/itemsPosition`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.jwtToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ itemsPosition: itemsPosition })
+        })
+            .then(res => res.json())
+            .then((result) => {
+                console.log(result)
+            })
+    };
+
+    const SortableContainer = sortableContainer(({ section }) => {
+        return (
+            <Grid container spacing={2}>
+                {section.items.map((e, index) => (
+                    <SortableItem
+                        key={`item-${index}`}
+                        index={index}
+                        item={e}
+                    />
+                ))}
+            </Grid>
+        )
+    });
+
+    const SortableItem = sortableElement(({ item }) =>
+        <SingleItemForm
+            {...item}
+            key={"ITEM_" + item.id}
+            removeItemFromList={() => removeItemFromList(item.id)}
+        />
+    );
 
     return (
         <Container>
@@ -67,35 +122,25 @@ function ModifySection(props) {
                 <LinearProgress />
             ) : (
                     <Container>
-                        <Grid container spacing={2}>
-                            <SingleSectionForm
-                                {...section}
-                            />
-                        </Grid>
+                        <Breadcrumbs aria-label="breadcrumb">
+                            <Link color="inherit" href="/">
+                                alessandro.montanari7@gmail.com
+                            </Link>
+                            <Link color="inherit" href="/modify/page/55">
+                                Università
+                            </Link>
+                            <Typography color="textPrimary">{section.title}</Typography>
+                        </Breadcrumbs>
 
                         <Typography variant="h3">
                             Item collegati
                         </Typography>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="center"> Saving </TableCell>
-                                    <TableCell align="center"> Titolo </TableCell>
-                                    <TableCell align="center"> Descrizione </TableCell>
-                                    <TableCell align="center"> Visibile </TableCell>
-                                    <TableCell align="center"> Utility </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {section.items.map((e, i) => (
-                                    <React.Fragment>
-                                        <p> e.id </p>
-                                        <p> e.title </p>
-                                    </React.Fragment>
-                                ))}
-                            </TableBody>
-                        </Table>
-
+                        <br /> <br />
+                        <SortableContainer
+                            useDragHandle
+                            onSortEnd={onSortEnd}
+                            section={section}
+                        />
                         <Button
                             variant="contained"
                             fullWidth
@@ -106,8 +151,9 @@ function ModifySection(props) {
                             AGGIUNGI ITEM
                         </Button>
                     </Container>
-                )}
-        </Container>
+                )
+            }
+        </Container >
     )
 }
 

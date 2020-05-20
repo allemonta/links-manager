@@ -3,19 +3,10 @@ import {
     LinearProgress,
     Typography,
     Container,
-    ListItem,
-    ListItemText,
-    List,
-    TableHead,
-    TableRow,
-    TableBody,
-    TableCell,
-    Table,
     Button,
     Snackbar,
     IconButton,
-    Grid,
-    Hidden
+    Grid
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -69,7 +60,8 @@ function HomePage() {
     function addNewPage() {
         let newPage = {
             title: "NEW_PAGE" + Math.floor(Math.random() * 100),
-            description: ""
+            description: "",
+            private: false
         }
 
         fetch(`https://api-links.montanari.live/pages`, {
@@ -110,7 +102,7 @@ function HomePage() {
                         <Grid container>
                             <Grid item xs={3}></Grid>
                             <Grid item xs={3} style={{ textAlign: 'center', height: 'inherit' }}>
-                                <img src={user.picturePath} height="100px" />
+                                <img src={user.picturePath} height="100px" alt="userPicture" />
                             </Grid>
                             <Grid item xs={3} style={{ height: 'inherit' }}>
                                 Nome: {user.name}
@@ -141,6 +133,7 @@ function HomePage() {
                                     removePageFromList={() => removePageFromList(e.id)}
                                     openSnackbar={() => setOpen(true)}
                                     {...e}
+                                    summaryButtons={true}
                                 />
                             ))}
                         </Grid>

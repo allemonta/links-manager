@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import Section from '../section/Section'
 import {
     Container,
-    LinearProgress
+    LinearProgress,
+    Typography
 } from '@material-ui/core';
 
 export default function Page(props) {
@@ -31,7 +32,10 @@ export default function Page(props) {
                 <LinearProgress />
             ) : (
                     <Container>
-                        <h1> {page.title} </h1>
+                        <Typography variant="h2">
+                            {page.title}
+                        </Typography>
+                        <br />
                         {page.sections.map((e, i) => (
                             <Section
                                 {...e}

@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import {
-    TableRow,
-    TableCell,
     Container,
     LinearProgress,
-    Table,
-    TableHead,
-    TableBody,
     Typography,
     Button,
-    Grid
+    Link,
+    Breadcrumbs
 } from '@material-ui/core';
 
 import SinglePageForm from './SinglePageForm'
 import SingleSectionForm from '../section/SingleSectionForm'
+import SharedPageUser from './SharedPageUser'
 
 function ModifyPage(props) {
     const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -46,12 +43,19 @@ function ModifyPage(props) {
         })
             .then(res => res.json())
             .then((result) => {
+                console.log(result)
                 if (result.section) {
                     let newPage = { ...page }
                     newPage.sections = newPage.sections.concat(result.section)
                     setPage(newPage)
                 }
             })
+    }
+
+    function removeSectionFromList(id) {
+        let newPage = { ...page }
+        newPage.sections = newPage.sections.filter(e => e.id !== id)
+        setPage(newPage)
     }
 
     useEffect(() => {
@@ -65,34 +69,24 @@ function ModifyPage(props) {
                 <LinearProgress />
             ) : (
                     <Container>
-                        <Grid container spacing={2}>
-                            <SinglePageForm
-                                {...page}
-                            />
-                        </Grid>
+                        <Breadcrumbs aria-label="breadcrumb">
+                            <Link color="inherit" href="/">
+                                alessandro.montanari7@gmail.com
+                            </Link>
+                            <Typography color="textPrimary">{page.title}</Typography>
+                        </Breadcrumbs>
 
                         <Typography variant="h3">
                             Sezioni collegate
                         </Typography>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="center"> Saving </TableCell>
-                                    <TableCell align="center"> Titolo </TableCell>
-                                    <TableCell align="center"> Descrizione </TableCell>
-                                    <TableCell align="center"> Visibile </TableCell>
-                                    <TableCell align="center"> Utility </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {page.sections.map((e, i) => (
-                                    <SingleSectionForm
-                                        {...e}
-                                        key={"singleSectionForm_" + i}
-                                    />
-                                ))}
-                            </TableBody>
-                        </Table>
+                        <br /> <br />
+                        {page.sections.map(e => (
+                            <SingleSectionForm
+                                {...e}
+                                key={"singleSectionForm_" + e.id}
+                                removeSectionFromList={() => removeSectionFromList(e.id)}
+                            />
+                        ))}
 
                         <Button
                             variant="contained"
@@ -103,6 +97,20 @@ function ModifyPage(props) {
                         >
                             AGGIUNGI SEZIONE
                         </Button>
+
+                        <br /> <br />
+                        {page.sharedUsers.length > 0 && (
+                            <React.Fragment>
+                                <Typography variant="h3">
+                                    Utenti in condivisione
+                                </Typography>
+                                {page.sharedUsers.map(e => (
+                                    <SharedPageUser
+                                        {...e}
+                                    />
+                                ))}
+                            </React.Fragment>
+                        )}
                     </Container>
                 )}
         </Container>

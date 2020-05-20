@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import {
-    TableRow,
-    TableCell,
     TextField,
     Button,
     ButtonGroup,
     CircularProgress,
-    Grid
+    Grid,
+    Checkbox
 } from '@material-ui/core';
 
 function SinglePageForm(props) {
     const [title, setTitle] = useState(props.title || "")
     const [description, setDescription] = useState(props.description || "")
+    const [privatePage, setPrivate] = useState(props.private)
 
     const [firstRender, setFirstRender] = useState(true)
     const [idTimeoutUpdate, setIdTimeoutUpdate] = useState(null)
@@ -20,7 +20,8 @@ function SinglePageForm(props) {
         let page = {
             id: props.id,
             title: title,
-            description: description
+            description: description,
+            private: privatePage
         }
 
         fetch(`https://api-links.montanari.live/pages`, {
@@ -59,20 +60,20 @@ function SinglePageForm(props) {
             setFirstRender(false)
         else {
             clearTimeout(idTimeoutUpdate);
-            setIdTimeoutUpdate(setTimeout(updatePage, 3000))
+            setIdTimeoutUpdate(setTimeout(updatePage, 2000))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [title, description])
+    }, [title, description, privatePage])
 
     return (
-        <Grid container spacing={2} style={{marginBottom: '20px'}}>
+        <Grid container spacing={2} style={{ marginBottom: '20px' }}>
             {/* Colonna 1*/}
             <Grid item xs={2} md={1}>
                 {!!idTimeoutUpdate && <CircularProgress size="30px" />}
             </Grid>
 
             {/* Colonna 2*/}
-            <Grid item xs={5} md={4}>
+            <Grid item xs={4} md={3}>
                 <TextField
                     fullWidth
                     label="Titolo"
@@ -93,8 +94,15 @@ function SinglePageForm(props) {
                 />
             </Grid>
 
+            <Grid item xs={1} md={1}>
+                <Checkbox
+                    checked={!!privatePage}
+                    onChange={(e) => setPrivate(e.target.checked)}
+                />
+            </Grid>
+
             {/* Colonna 4*/}
-            <Grid item xs={12} md={3} style={{ paddingTop: "17px"}} >
+            <Grid item xs={12} md={3} style={{ paddingTop: "17px" }} >
                 <ButtonGroup
                     color="primary"
                     aria-label="contained primary button group"
@@ -106,6 +114,7 @@ function SinglePageForm(props) {
                     >
                         <img src="/img/icons/modify.png" alt="modifyIcon" width="25px" />
                     </Button>
+
                     <Button
                         variant="contained"
                         onClick={() => {
@@ -115,12 +124,14 @@ function SinglePageForm(props) {
                     >
                         <img src="/img/icons/copy.png" alt="modifyIcon" width="25px" />
                     </Button>
+
                     <Button
                         variant="contained"
                         href={"/page/" + props.id}
                     >
                         <img src="/img/icons/linkEsterno.png" alt="linkEsterno" width="25px" />
                     </Button>
+
                     <Button
                         variant="contained"
                         onClick={removePage}
@@ -129,6 +140,7 @@ function SinglePageForm(props) {
                     </Button>
                 </ButtonGroup>
             </Grid>
+            
         </Grid>
     )
 }
